@@ -1,0 +1,127 @@
+name: "Autograding Lab 01"
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  checks: write
+  contents: read
+  actions: read
+
+jobs:
+  grade:
+    name: "Grade Lab 01"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────
+      - name: Checkout student repository
+        uses: actions/checkout@v4
+
+      # ── 2. Python setup ──────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # ── 3. Run grading scripts ────────────────────────────────────────
+      - name: Check 1 — File presence & sizes
+        id: check_files
+        run: |
+          python3 .grading/check_files.py lab01 | tee /tmp/files_out.txt
+          echo "raw_out<<EOF" >> $GITHUB_OUTPUT
+          cat /tmp/files_out.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          SCORE=$(grep "FILE_SCORE:" /tmp/files_out.txt | awk '{print $2}')
+          echo "score=${SCORE:-0}" >> $GITHUB_OUTPUT
+
+      - name: Check 2 — XML structure of .circ files
+        id: check_xml
+        run: |
+          python3 .grading/check_circ_xml.py lab01 | tee /tmp/xml_out.txt
+          echo "raw_out<<EOF" >> $GITHUB_OUTPUT
+          cat /tmp/xml_out.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          SCORE=$(grep "XML_SCORE:" /tmp/xml_out.txt | awk '{print $2}')
+          echo "score=${SCORE:-0}" >> $GITHUB_OUTPUT
+
+      - name: Check 3 — report.md completeness
+        id: check_report
+        run: |
+          python3 .grading/check_report.py lab01 | tee /tmp/report_out.txt
+          echo "raw_out<<EOF" >> $GITHUB_OUTPUT
+          cat /tmp/report_out.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          SCORE=$(grep "REPORT_SCORE:" /tmp/report_out.txt | awk '{print $2}')
+          echo "score=${SCORE:-0}" >> $GITHUB_OUTPUT
+
+      # ── 4. Calculate total ────────────────────────────────────────────
+      - name: Calculate total score
+        id: total
+        run: |
+          python3 - <<'PYEOF'
+          import json, os
+
+          f_score = float("${{ steps.check_files.outputs.score }}" or 0)
+          x_score = float("${{ steps.check_xml.outputs.score }}"  or 0)
+          r_score = float("${{ steps.check_report.outputs.score }}" or 0)
+
+          total = min(round(f_score + x_score + r_score), 100)
+
+          result = {
+            "lab": "lab01",
+            "file_check_score":   f_score,
+            "xml_check_score":    x_score,
+            "report_check_score": r_score,
+            "total_score":        total
+          }
+
+          with open("grading_results.json", "w") as fp:
+              json.dump(result, fp, indent=2)
+
+          print("=" * 48)
+          print("  LAB 01 AUTOGRADING RESULTS")
+          print("=" * 48)
+          print(f"  File presence check  : {f_score:5.1f} / 30")
+          print(f"  Circuit XML check    : {x_score:5.1f} / 45")
+          print(f"  Report quality check : {r_score:5.1f} / 15")
+          print("-" * 48)
+          print(f"  SCORE: {total} / 100")
+          print("=" * 48)
+          PYEOF
+
+      # ── 5. Save results artifact ──────────────────────────────────────
+      - name: Upload grading results
+        uses: actions/upload-artifact@v4
+        with:
+          name: grading-results-lab01
+          path: grading_results.json
+          retention-days: 90
+
+      # ── 6. Print full detail for student ─────────────────────────────
+      - name: Print detailed results
+        run: |
+          echo "──── File Check Details ────"
+          cat /tmp/files_out.txt
+          echo ""
+          echo "──── XML Check Details ────"
+          cat /tmp/xml_out.txt
+          echo ""
+          echo "──── Report Check Details ────"
+          cat /tmp/report_out.txt
+          echo ""
+          echo "──── grading_results.json ────"
+          cat grading_results.json
+
+      # ── 7. Fail the run if score is 0 (shows red X on GitHub) ────────
+      - name: Set exit code based on score
+        run: |
+          TOTAL=$(python3 -c "import json; d=json.load(open('grading_results.json')); print(d['total_score'])")
+          echo "Final score: $TOTAL/100"
+          if [ "$TOTAL" -eq "0" ]; then
+            echo "Score is 0 — please check your submission!"
+            exit 1
+          fi

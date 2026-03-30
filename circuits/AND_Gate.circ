@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  AND_Gate.circ  — Starter file for Lab 01, Task 1.2
+  =====================================================
+  This file is a SKELETON. It opens in Logisim-Evolution as an empty
+  circuit named "AND_Gate".
+
+  Your job:
+    1. Open this file in Logisim-Evolution  (File → Open)
+    2. Build the AND gate circuit on the canvas:
+         - Place two Input Pins  (label: A, B)
+         - Place one AND Gate    (Gates library)
+         - Place one Output Pin  (label: Y)
+         - Wire them together
+    3. Test all 4 input combinations using the Poke Tool
+    4. Take screenshots and save this file back to circuits/AND_Gate.circ
+-->
+<project version="1.0">
+  <lib desc="#Gates" name="0"/>
+  <lib desc="#Wiring" name="1"/>
+  <circuit name="AND_Gate">
+    <!--
+      TODO: Add your components here by building the circuit in Logisim.
+      When you save, Logisim will populate this file automatically.
+
+      Expected components:
+        - comp name="AND Gate"  lib="0"   (1 gate)
+        - comp name="Pin"       lib="1"   (2 inputs: A, B)
+        - comp name="Pin"       lib="1"   (1 output: Y)
+        - wire elements connecting all pins to the gate
+    -->
+  </circuit>
+</project>

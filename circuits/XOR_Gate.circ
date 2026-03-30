@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  XOR_Gate.circ  — Starter file for Lab 01, Task 1.4
+  =====================================================
+  SKELETON — open in Logisim-Evolution and build the XOR gate.
+
+  Your job:
+    1. Open this file  (File → Open)
+    2. Build the XOR gate circuit:
+         - Place two Input Pins  (label: A, B)
+         - Place one XOR Gate    (Gates library)
+         - Place one Output Pin  (label: Y)
+         - Wire all components
+    3. Test all 4 combinations with the Poke Tool
+    4. Take screenshots and save as circuits/XOR_Gate.circ
+
+  BONUS TASK (optional, +10 pts):
+    Build a second circuit named "XOR_from_basic_gates" that implements
+    XOR using ONLY AND, OR, and NOT gates (no XOR primitive).
+    Boolean expression:  A ⊕ B = (A · B̄) + (Ā · B)
+    Save as: circuits/XOR_from_basic_gates.circ
+-->
+<project version="1.0">
+  <lib desc="#Gates" name="0"/>
+  <lib desc="#Wiring" name="1"/>
+  <circuit name="XOR_Gate">
+    <!--
+      TODO: Build the XOR gate circuit in Logisim.
+
+      Expected components:
+        - comp name="XOR Gate"  lib="0"   (1 gate)
+        - comp name="Pin"       lib="1"   (2 inputs: A, B)
+        - comp name="Pin"       lib="1"   (1 output: Y)
+        - wire elements
+    -->
+  </circuit>
+</project>
